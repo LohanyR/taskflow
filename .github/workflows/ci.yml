@@ -1,6 +1,5 @@
-# Automação de testes e validação do taskflow
-name: CI - TaskFlow
-
+name: CI TaskFlow
+ 
 on:
 push:
 branches:
