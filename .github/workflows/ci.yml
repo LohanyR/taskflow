@@ -1,3 +1,4 @@
+# Automação de testes e validação do taskflow
 name: CI - TaskFlow
 
 on:
@@ -33,3 +34,4 @@ run: npm run test:run
 
 - name: Gerar build
 run: npm run build
+
