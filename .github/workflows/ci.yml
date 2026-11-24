@@ -3,6 +3,13 @@ name: TaskFlow CI
 
 on:
   push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
 
 jobs:
   teste:
@@ -12,5 +19,20 @@ jobs:
       - name: Baixar codigo
         uses: actions/checkout@v4
 
-      - name: Verificar arquivo
-        run: echo "GitHub Actions funcionando!"
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Verificar codigo
+        run: npm run lint
+
+      - name: Executar testes
+        run: npm run test:run
+
+      - name: Gerar build
+        run: npm run build
