@@ -26,7 +26,7 @@ screen.getByRole('button', { name: /adicionar tarefa/i })
 );
 
 expect(
-screen.getByText('Estudar Node.js')
+screen.getByText('Tarefa que não existe')
 ).toBeInTheDocument();
 
 expect(screen.getByText('Total de tarefas').parentElement).toHaveTextContent('1');
