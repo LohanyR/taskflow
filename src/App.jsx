@@ -1,218 +1,294 @@
+
 import { useEffect, useState } from 'react';
 import './App.css';
 
 function App() {
-const [tasks, setTasks] = useState(() => {
-const savedTasks = localStorage.getItem('taskflow-tasks');
-return savedTasks ? JSON.parse(savedTasks) : [];
-});
+  const [tasks, setTasks] = useState(() => {
+    const savedTasks = localStorage.getItem('taskflow-tasks');
+    return savedTasks ? JSON.parse(savedTasks) : [];
+  });
 
-const [title, setTitle] = useState('');
-const [description, setDescription] = useState('');
-const [date, setDate] = useState('');
-const [filter, setFilter] = useState('all');
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [date, setDate] = useState('');
+  const [filter, setFilter] = useState('all');
+  const [editingId, setEditingId] = useState(null);
 
-// Salva as tarefas no navegador sempre que houver alteração
-useEffect(() => {
-localStorage.setItem('taskflow-tasks', JSON.stringify(tasks));
-}, [tasks]);
+  // Salva as tarefas no navegador sempre que houver alteração
+  useEffect(() => {
+    localStorage.setItem('taskflow-tasks', JSON.stringify(tasks));
+  }, [tasks]);
 
-// Cadastra uma nova tarefa
-function addTask(event) {
-event.preventDefault();
+  // Cadastra uma nova tarefa ou salva uma edição
+  function addTask(event) {
+    event.preventDefault();
 
-if (!title.trim()) return;
+    if (!title.trim()) return;
 
-const newTask = {
-id: crypto.randomUUID(),
-title: title.trim(),
-description: description.trim(),
-date,
-completed: false,
-};
+    if (editingId !== null) {
+      // Atualiza a tarefa existente
+      setTasks(tasks.map(task =>
+        task.id === editingId
+          ? {
+              ...task,
+              title: title.trim(),
+              description: description.trim(),
+              date
+            }
+          : task
+      ));
 
-setTasks([...tasks, newTask]);
+      setEditingId(null);
+    } else {
+      // Cadastra uma nova tarefa
+      const newTask = {
+        id: crypto.randomUUID(),
+        title: title.trim(),
+        description: description.trim(),
+        date,
+        completed: false,
+      };
 
-setTitle('');
-setDescription('');
-setDate('');
-}
+      setTasks([...tasks, newTask]);
+    }
 
-// Altera o status da tarefa
-function toggleTask(id) {
-setTasks(tasks.map(task =>
-task.id === id
-? { ...task, completed: !task.completed }
-: task
-));
-}
+    // Limpa o formulário
+    setTitle('');
+    setDescription('');
+    setDate('');
+  }
 
-// Exclui uma tarefa
-function deleteTask(id) {
-setTasks(tasks.filter(task => task.id !== id));
-}
+  // Altera o status da tarefa
+  function toggleTask(id) {
+    setTasks(tasks.map(task =>
+      task.id === id
+        ? { ...task, completed: !task.completed }
+        : task
+    ));
+  }
 
-const completedTasks = tasks.filter(task => task.completed).length;
-const pendingTasks = tasks.length - completedTasks;
+  // Exclui uma tarefa
+  function deleteTask(id) {
+    setTasks(tasks.filter(task => task.id !== id));
 
-const filteredTasks = tasks.filter(task => {
-if (filter === 'pending') return !task.completed;
-if (filter === 'completed') return task.completed;
-return true;
-});
+    if (editingId === id) {
+      cancelEdit();
+    }
+  }
 
-return (
-<div className="app-container">
-<header className="header">
-<div className="logo">
-<span className="logo-icon">✓</span>
-<span>TaskFlow</span>
-</div>
-<span className="header-label">Organize sua rotina</span>
-</header>
+  // Preenche o formulário com os dados da tarefa selecionada
+  function editTask(id) {
+    const task = tasks.find(task => task.id === id);
 
-<main className="main-content">
-<section className="welcome">
-<p className="welcome-label">SEU ESPAÇO DE ORGANIZAÇÃO</p>
-<h1>Olá! Vamos organizar seu dia?</h1>
-<p>Pequenos passos levam a grandes conquistas.</p>
-</section>
+    if (!task) return;
 
-<section className="stats">
-<div className="stat-card">
-<span>Total de tarefas</span>
-<strong>{tasks.length}</strong>
-</div>
+    setEditingId(id);
+    setTitle(task.title);
+    setDescription(task.description || '');
+    setDate(task.date || '');
+  }
 
-<div className="stat-card">
-<span>Pendentes</span>
-<strong>{pendingTasks}</strong>
-</div>
+  // Cancela a edição
+  function cancelEdit() {
+    setEditingId(null);
+    setTitle('');
+    setDescription('');
+    setDate('');
+  }
 
-<div className="stat-card">
-<span>Concluídas</span>
-<strong>{completedTasks}</strong>
-</div>
-</section>
+  // Calcula as estatísticas
+  const completedTasks = tasks.filter(task => task.completed).length;
+  const pendingTasks = tasks.length - completedTasks;
 
-<section className="task-form-section">
-<h2>Adicionar nova tarefa</h2>
+  // Filtra as tarefas
+  const filteredTasks = tasks.filter(task => {
+    if (filter === 'pending') return !task.completed;
+    if (filter === 'completed') return task.completed;
+    return true;
+  });
 
-<form onSubmit={addTask} className="task-form">
-<label htmlFor="title">Título da tarefa</label>
-<input
-id="title"
-type="text"
-placeholder="Ex.: Estudar programação"
-value={title}
-onChange={event => setTitle(event.target.value)}
-required
-/>
+  return (
+    <div className="app-container">
+      <header className="header">
+        <div className="logo">
+          <span className="logo-icon">✓</span>
+          <span>TaskFlow</span>
+        </div>
+        <span className="header-label">Organize sua rotina</span>
+      </header>
 
-<label htmlFor="description">Descrição</label>
-<textarea
-id="description"
-placeholder="Descreva sua tarefa..."
-value={description}
-onChange={event => setDescription(event.target.value)}
-rows="3"
-/>
+      <main className="main-content">
+        <section className="welcome">
+          <p className="welcome-label">
+            SEU ESPAÇO DE ORGANIZAÇÃO
+          </p>
+          <h1>Olá! Vamos organizar seu dia?</h1>
+          <p>Pequenos passos levam a grandes conquistas.</p>
+        </section>
 
-<label htmlFor="date">Prazo</label>
-<input
-id="date"
-type="date"
-value={date}
-onChange={event => setDate(event.target.value)}
-/>
+        <section className="stats">
+          <div className="stat-card">
+            <span>Total de tarefas</span>
+            <strong>{tasks.length}</strong>
+          </div>
 
-<button type="submit" className="add-button">
-+ Adicionar tarefa
-</button>
-</form>
-</section>
+          <div className="stat-card">
+            <span>Pendentes</span>
+            <strong>{pendingTasks}</strong>
+          </div>
 
-<section className="tasks-section">
-<div className="tasks-heading">
-<h2>Minhas tarefas</h2>
+          <div className="stat-card">
+            <span>Concluídas</span>
+            <strong>{completedTasks}</strong>
+          </div>
+        </section>
 
-<div className="filters">
-<button
-className={filter === 'all' ? 'active' : ''}
-onClick={() => setFilter('all')}
->
-Todas
-</button>
+        <section className="task-form-section">
+          <h2>
+            {editingId !== null
+              ? 'Editar tarefa'
+              : 'Adicionar nova tarefa'}
+          </h2>
 
-<button
-className={filter === 'pending' ? 'active' : ''}
-onClick={() => setFilter('pending')}
->
-Pendentes
-</button>
+          <form onSubmit={addTask} className="task-form">
+            <label htmlFor="title">Título da tarefa</label>
+            <input
+              id="title"
+              type="text"
+              placeholder="Ex.: Estudar programação"
+              value={title}
+              onChange={event => setTitle(event.target.value)}
+              required
+            />
 
-<button
-className={filter === 'completed' ? 'active' : ''}
-onClick={() => setFilter('completed')}
->
-Concluídas
-</button>
-</div>
-</div>
+            <label htmlFor="description">Descrição</label>
+            <textarea
+              id="description"
+              placeholder="Descreva sua tarefa..."
+              value={description}
+              onChange={event => setDescription(event.target.value)}
+              rows="3"
+            />
 
-<div className="task-list">
-{filteredTasks.length === 0 ? (
-<div className="empty-state">
-<span>📝</span>
-<p>Nenhuma tarefa encontrada.</p>
-<small>Adicione uma nova tarefa para começar!</small>
-</div>
-) : (
-filteredTasks.map(task => (
-<div
-className={`task-card ${task.completed ? 'completed' : ''}`}
-key={task.id}
->
-<div className="task-info">
-<h3>{task.title}</h3>
+            <label htmlFor="date">Prazo</label>
+            <input
+              id="date"
+              type="date"
+              value={date}
+              onChange={event => setDate(event.target.value)}
+            />
 
-{task.description && (
-<p>{task.description}</p>
-)}
+            <button type="submit" className="add-button">
+              {editingId !== null
+                ? 'Salvar alterações'
+                : '+ Adicionar tarefa'}
+            </button>
 
-{task.date && (
-<small>Prazo: {task.date}</small>
-)}
-</div>
+            {editingId !== null && (
+              <button
+                type="button"
+                className="cancel-button"
+                onClick={cancelEdit}
+              >
+                Cancelar edição
+              </button>
+            )}
+          </form>
+        </section>
 
-<div className="task-actions">
-<button
-onClick={() => toggleTask(task.id)}
-className="complete-button"
->
-{task.completed ? 'Reabrir' : 'Concluir'}
-</button>
+        <section className="tasks-section">
+          <div className="tasks-heading">
+            <h2>Minhas tarefas</h2>
 
-<button
-onClick={() => deleteTask(task.id)}
-className="delete-button"
-aria-label={`Excluir ${task.title}`}
->
-Excluir
-</button>
-</div>
-</div>
-))
-)}
-</div>
-</section>
-</main>
+            <div className="filters">
+              <button
+                className={filter === 'all' ? 'active' : ''}
+                onClick={() => setFilter('all')}
+              >
+                Todas
+              </button>
 
-<footer>
-<p>TaskFlow © 2026 — Organização que transforma resultados.</p>
-</footer>
-</div>
-);
+              <button
+                className={filter === 'pending' ? 'active' : ''}
+                onClick={() => setFilter('pending')}
+              >
+                Pendentes
+              </button>
+
+              <button
+                className={filter === 'completed' ? 'active' : ''}
+                onClick={() => setFilter('completed')}
+              >
+                Concluídas
+              </button>
+            </div>
+          </div>
+
+          <div className="task-list">
+            {filteredTasks.length === 0 ? (
+              <div className="empty-state">
+                <span>📝</span>
+                <p>Nenhuma tarefa encontrada.</p>
+                <small>
+                  Adicione uma nova tarefa para começar!
+                </small>
+              </div>
+            ) : (
+              filteredTasks.map(task => (
+                <div
+                  className={`task-card ${task.completed ? 'completed' : ''}`}
+                  key={task.id}
+                >
+                  <div className="task-info">
+                    <h3>{task.title}</h3>
+
+                    {task.description && (
+                      <p>{task.description}</p>
+                    )}
+
+                    {task.date && (
+                      <small>Prazo: {task.date}</small>
+                    )}
+                  </div>
+
+                  <div className="task-actions">
+                    <button
+                      onClick={() => toggleTask(task.id)}
+                      className="complete-button"
+                    >
+                      {task.completed ? 'Reabrir' : 'Concluir'}
+                    </button>
+
+                    <button
+                      onClick={() => editTask(task.id)}
+                      className="edit-button"
+                      aria-label={`Editar ${task.title}`}
+                    >
+                      Editar
+                    </button>
+
+                    <button
+                      onClick={() => deleteTask(task.id)}
+                      className="delete-button"
+                      aria-label={`Excluir ${task.title}`}
+                    >
+                      Excluir
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </section>
+      </main>
+
+      <footer>
+        <p>
+          TaskFlow © 2026 — Organização que transforma resultados.
+        </p>
+      </footer>
+    </div>
+  );
 }
 
 export default App;
