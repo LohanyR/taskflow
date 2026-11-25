@@ -1,16 +1,83 @@
-# React + Vite
+# TaskFlow
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+O **TaskFlow** é uma aplicação web desenvolvida para facilitar o gerenciamento de tarefas. Com ela, o usuário pode cadastrar, concluir, excluir e filtrar tarefas de maneira simples e organizada.
 
-Currently, two official plugins are available:
+## Tecnologias utilizadas
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React
+- Vite
+- JavaScript
+- Vitest
+- Testing Library
+- Git e GitHub
+- GitHub Actions
+- GitHub Pages
 
-## React Compiler
+## Funcionalidades
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Cadastro de tarefas.
+- Conclusão de tarefas.
+- Exclusão de tarefas.
+- Filtro de tarefas concluídas.
 
-## Expanding the ESLint configuration
+## Testes automatizados
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+O projeto utiliza Vitest e Testing Library para verificar o funcionamento das principais funcionalidades.
+
+Atualmente, são realizados testes para:
+
+1. Cadastro de uma nova tarefa.
+2. Conclusão de uma tarefa.
+3. Exclusão de uma tarefa.
+4. Filtragem de tarefas concluídas.
+
+## Integração e entrega contínuas (CI/CD)
+
+O projeto utiliza GitHub Actions para automatizar o processo de integração e entrega contínuas.
+
+- **Pull Request:** executa a verificação do código, os testes automatizados e a build.
+- **Push na branch main:** executa as mesmas verificações e realiza a publicação da aplicação no GitHub Pages.
+
+A branch `main` possui proteção para impedir alterações diretas e exigir que as verificações sejam aprovadas antes da integração.
+
+## Como executar o projeto
+
+Instale as dependências:
+
+```bash
+npm install
+```
+
+Execute a aplicação:
+
+```bash
+npm run dev
+```
+
+Execute os testes:
+
+```bash
+npm run test:run
+```
+
+Verifique o código:
+
+```bash
+npm run lint
+```
+
+Gere a versão de produção:
+
+```bash
+npm run build
+```
+
+## Publicação
+
+A aplicação está disponível em:
+
+https://lohanyr.github.io/taskflow/
+
+---
+
+**Projeto acadêmico — ADS | FAETERJ**
